@@ -1,97 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
-:root {
-  --color-soft-apricot: #F9DBBD;
-  --color-cotton-candy: #FFA5AB;
-  --color-blush-rose: #DA627D;
-  --color-berry-crush: #A53860;
-  --color-night-bordeaux: #450920;
-  --bg-primary: #ffffff;
-  --bg-secondary: var(--color-soft-apricot);
-  --text-main: var(--color-night-bordeaux);
-  --text-muted: var(--color-berry-crush);
-  --accent-primary: var(--color-cotton-candy);
-  --accent-secondary: var(--color-blush-rose);
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  font-family: var(--font-body);
-  line-height: 1.6;
-  font-weight: 400;
-  color: var(--text-main);
-  background-color: var(--bg-primary);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-soft-apricot: #F9DBBD;
+    --color-cotton-candy: #FFA5AB;
+    --color-blush-rose: #DA627D;
+    --color-berry-crush: #A53860;
+    --color-night-bordeaux: #450920;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply text-night-bordeaux bg-white min-h-screen antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Outfit', sans-serif;
+    @apply text-night-bordeaux leading-tight mb-4;
+  }
+
+  a {
+    @apply font-medium text-berry-crush transition-all duration-300 ease-in-out hover:text-blush-rose;
+  }
 }
 
-* {
-  box-sizing: border-box;
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl font-semibold bg-cotton-candy text-night-bordeaux shadow-md transition-all duration-300 hover:bg-blush-rose hover:text-white hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0;
+  }
+
+  .container-custom {
+    @apply max-w-[1200px] mx-auto px-6;
+  }
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-h1,h2,h3,h4,h5,h6 {
-  font-family: var(--font-heading);
-  color: var(--color-night-bordeaux);
-  margin-bottom: 1rem;
-  line-height: 1.2;
-}
-
-a {
-  font-weight: 500;
-  color: var(--color-berry-crush);
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-a:hover {
-  color: var(--color-blush-rose);
-}
-
-button {
-  font-family: var(--font-body);
-  border-radius: 12px;
-  border: none;
-  padding: 0.8em 1.6em;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  background-color: var(--accent-primary);
-  color: var(--color-night-bordeaux);
-  transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-button:hover {
-  background-color: var(--accent-secondary);
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-button:active {
-  transform: translateY(0);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-/* Scrollbar Styling */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: white;
 }
 
 ::-webkit-scrollbar-thumb {
