@@ -107,7 +107,46 @@
     box-shadow: none;
 }
 
+.navbar-icons {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-icon-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--color-night-bordeaux);
+    transition: color 0.3s ease;
+}
+
+.nav-icon-link:hover {
+    color: var(--color-blush-rose);
+}
+
+.icon-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--color-blush-rose);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid white;
+}
+
 @media screen and (max-width: 960px) {
+    .navbar-icons {
+        padding: 1rem 0;
+    }
+
     .navbar-toggle {
         display: block;
         cursor: pointer;
