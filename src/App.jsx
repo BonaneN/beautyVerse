@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 
 // Pages
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Auth from './pages/Auth';
 import Products from './pages/Products';
 import Services from './pages/Services';
 import Professionals from './pages/Professionals';
@@ -15,17 +14,7 @@ import NotFound from './pages/NotFound';
 // Components
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-
-// Route guard for authenticated paths
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div className="loading-screen">Loading BeautyVerse...</div>;
-  }
-
-  return user ? children : <Navigate to="/login" replace />;
-};
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
@@ -37,8 +26,8 @@ function App() {
             <Routes>
               {/* Publicly accessible Routes */}
               <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Auth initialMode="login" />} />
+              <Route path="/register" element={<Auth initialMode="register" />} />
               <Route path="/products" element={<Products />} />
               <Route path="/services" element={<Services />} />
               <Route path="/professionals" element={<Professionals />} />
