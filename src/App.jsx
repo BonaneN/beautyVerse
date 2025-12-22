@@ -14,6 +14,7 @@ import NotFound from './pages/NotFound';
 
 // Components
 import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
 
 // Route guard for authenticated paths
 const ProtectedRoute = ({ children }) => {
