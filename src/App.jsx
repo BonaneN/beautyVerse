@@ -12,8 +12,10 @@ import Professionals from './pages/Professionals';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
+// Components
+import Navbar from './components/layout/Navbar';
 
-// Protected routes
+// Route guard for authenticated paths
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -28,27 +30,33 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <main className="app-main">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/professionals" element={<Professionals />} />
+        <div className="app-container">
+          <Navbar />
+          <main className="app-main">
+            <Routes>
+              {/* Publicly accessible Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/professionals" element={<Professionals />} />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected Routes for registered users */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </div>
       </Router>
     </AuthProvider>
   );
