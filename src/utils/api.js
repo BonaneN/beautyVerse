@@ -1,7 +1,7 @@
 // Handles base URL, auth tokens from localStorage, and standardizes requests.
 
 const BASE_URL = 'https://bonane00.pythonanywhere.com';
- 
+
 const api = {
     async request(endpoint, options = {}) {
         const token = localStorage.getItem('access_token');

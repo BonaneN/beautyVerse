@@ -17,15 +17,15 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
 
-// Login user and save tokens to localStorage
+    // Login user and save tokens to localStorage
     const login = async (username, password) => {
         try {
-            const data = await api.post('/beautyVerse/users/login-user/', { username, password });
+            const data = await api.post('/beautyVerse/users/token/', { username, password });
 
             if (data.access) {
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('refresh_token', data.refresh);
-                setUser({ loggedIn: true, ...data.user });
+                setUser({ loggedIn: true, username });
                 return { success: true };
             }
             throw new Error('Invalid login response');
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     };
 
 
-// Register a new account
+    // Register a new account
     const register = async (userData) => {
         try {
             await api.post('/beautyVerse/users/create-account/', userData);
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
     };
 
 
-// Clear tokens and reset state
+    // Clear tokens and reset state
     const logout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
