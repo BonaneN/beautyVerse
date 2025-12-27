@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 
 const AddProductForm = ({ onProductAdded }) => {
+    const { user } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
-        description: '',
+        description: '', // Full description
         price: '',
         discount_percentage: '',
         category: '',
-        stock_quantity: '',
-        image_url: '',
-        free_delivery: false
+        product_image: '', // URL or File
+        delivery_option: 'Shop Pickup',
+        shop_location: ''
     });
     const [categories, setCategories] = useState([]);
     const [imageFile, setImageFile] = useState(null);
@@ -25,8 +28,8 @@ const AddProductForm = ({ onProductAdded }) => {
         const fetchCategories = async () => {
             try {
                 console.log('Fetching categories from API...');
-                // Categories is likely under products app or global
-                const data = await api.get('/beautyVerse/products/categories/');
+                // Verified endpoint: /products/list-categories/
+                const data = await api.get('/products/list-categories/');
                 console.log('Categories API response:', data);
 
                 if (Array.isArray(data)) {
@@ -49,8 +52,8 @@ const AddProductForm = ({ onProductAdded }) => {
             [name]: type === 'checkbox' ? checked : value
         }));
 
-        if (name === 'image_url' && value) {
-            setImagePreview(value);
+        if (name === 'product_image') {
+            setImagePreview(value || '');
         }
     };
 
@@ -79,21 +82,23 @@ const AddProductForm = ({ onProductAdded }) => {
                 const formDataToSend = new FormData();
                 formDataToSend.append('name', formData.name);
                 formDataToSend.append('description', formData.description);
-                formDataToSend.append('price', parseFloat(formData.price));
-                formDataToSend.append('category', formData.category);
-                formDataToSend.append('stock_quantity', parseInt(formData.stock_quantity));
-                formDataToSend.append('free_delivery', formData.free_delivery);
+                formDataToSend.append('price', formData.price);
+                formDataToSend.append('category', formData.category); // Sending Name (e.g., "Makeup")
+                formDataToSend.append('delivery_option', formData.delivery_option);
+                formDataToSend.append('shop_location', formData.shop_location);
 
                 if (formData.discount_percentage) {
-                    const discountPrice = parseFloat(formData.price) * (1 - parseFloat(formData.discount_percentage) / 100);
-                    formDataToSend.append('discount_price', discountPrice.toFixed(2));
+                    formDataToSend.append('discount_percentage', formData.discount_percentage);
                 }
 
-                formDataToSend.append('image', imageFile);
+                formDataToSend.append('product_image', imageFile);
 
                 const token = localStorage.getItem('access_token');
-                // Using correct documentation path: /beautyVerse/products/add-new-product/
-                const res = await fetch('https://bonane00.pythonanywhere.com/beautyVerse/products/add-new-product/', {
+                const baseUrl = 'https://bonane00.pythonanywhere.com/beautyVerse';
+
+                console.log('Uploading with FormData to:', `${baseUrl}/products/add-new-product/`);
+
+                const res = await fetch(`${baseUrl}/products/add-new-product/`, {
                     method: 'POST',
                     headers: {
                         ...(token && { 'Authorization': `Bearer ${token}` })
@@ -102,8 +107,21 @@ const AddProductForm = ({ onProductAdded }) => {
                 });
 
                 if (!res.ok) {
-                    const errorData = await res.json().catch(() => ({}));
-                    throw new Error(errorData.detail || errorData.error || 'Failed to add product');
+                    const errorText = await res.text();
+                    console.error('--- RAW SERVER ERROR ---');
+                    console.error(errorText);
+
+                    let errorData = {};
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        console.warn('Response was not JSON');
+                    }
+
+                    console.error('Upload Failed Error Data:', errorData);
+                    const error = new Error(errorData.detail || errorData.error || `Server Error (${res.status})`);
+                    error.data = errorData;
+                    throw error;
                 }
 
                 response = await res.json();
@@ -112,19 +130,15 @@ const AddProductForm = ({ onProductAdded }) => {
                     name: formData.name,
                     description: formData.description,
                     price: parseFloat(formData.price),
-                    category: formData.category,
-                    stock_quantity: parseInt(formData.stock_quantity),
-                    image_url: formData.image_url,
-                    free_delivery: formData.free_delivery
+                    discount_percentage: formData.discount_percentage ? parseFloat(formData.discount_percentage) : 0,
+                    category: formData.category, // Sending Name
+                    product_image: formData.product_image, // image URL
+                    delivery_option: formData.delivery_option,
+                    shop_location: formData.shop_location
                 };
 
-                if (formData.discount_percentage) {
-                    const discountPrice = parseFloat(formData.price) * (1 - parseFloat(formData.discount_percentage) / 100);
-                    productData.discount_price = parseFloat(discountPrice.toFixed(2));
-                }
-
-                // Documentation path: /beautyVerse/products/add-new-product/
-                response = await api.post('/beautyVerse/products/add-new-product/', productData);
+                console.log('Sending JSON Payload:', productData);
+                response = await api.post('/products/add-new-product/', productData);
             }
 
             setSuccess('Product added successfully!');
@@ -134,9 +148,9 @@ const AddProductForm = ({ onProductAdded }) => {
                 price: '',
                 discount_percentage: '',
                 category: '',
-                stock_quantity: '',
-                image_url: '',
-                free_delivery: false
+                product_image: '',
+                delivery_option: 'Shop Pickup',
+                shop_location: ''
             });
             setImageFile(null);
             setImagePreview('');
@@ -147,7 +161,18 @@ const AddProductForm = ({ onProductAdded }) => {
 
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.message || 'Failed to add product');
+            console.error('Error adding product:', err);
+
+            // Prioritize structured data from API response
+            const fieldErrors = err.data;
+            if (fieldErrors && typeof fieldErrors === 'object' && !Array.isArray(fieldErrors)) {
+                const errorMsg = Object.entries(fieldErrors)
+                    .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+                    .join(' | ');
+                setError(errorMsg || 'Failed to add product');
+            } else {
+                setError(err.message || 'Failed to add product');
+            }
         } finally {
             setLoading(false);
         }
@@ -191,9 +216,16 @@ const AddProductForm = ({ onProductAdded }) => {
 
                     {/* Category Dropdown */}
                     <div>
-                        <label className="block text-sm font-semibold text-night-bordeaux mb-2">
-                            Category *
-                        </label>
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-semibold text-night-bordeaux">
+                                Category *
+                            </label>
+                            {user && user.isAdmin && (
+                                <Link to="/admin" className="text-xs font-bold text-blush-rose hover:underline">
+                                    + Add New
+                                </Link>
+                            )}
+                        </div>
                         <select
                             name="category"
                             value={formData.category}
@@ -203,11 +235,27 @@ const AddProductForm = ({ onProductAdded }) => {
                         >
                             <option value="">Select a category</option>
                             {categories.map((cat) => (
-                                <option key={cat.id || cat.name} value={cat.name}>
+                                <option key={cat.id} value={cat.name}>
                                     {cat.name}
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    {/* Shop Location */}
+                    <div className="md:col-span-2 lg:col-span-1">
+                        <label className="block text-sm font-semibold text-night-bordeaux mb-2">
+                            Shop Location *
+                        </label>
+                        <input
+                            type="text"
+                            name="shop_location"
+                            value={formData.shop_location}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-cotton-candy focus:ring-2 focus:ring-cotton-candy/20 outline-none transition-all"
+                            placeholder="e.g., Kigali, CHIC Building"
+                        />
                     </div>
                 </div>
 
@@ -265,23 +313,6 @@ const AddProductForm = ({ onProductAdded }) => {
                             placeholder="e.g., 10"
                         />
                     </div>
-
-                    {/* Stock Quantity */}
-                    <div>
-                        <label className="block text-sm font-semibold text-night-bordeaux mb-2">
-                            Stock Quantity *
-                        </label>
-                        <input
-                            type="number"
-                            name="stock_quantity"
-                            value={formData.stock_quantity}
-                            onChange={handleChange}
-                            required
-                            min="0"
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-cotton-candy focus:ring-2 focus:ring-cotton-candy/20 outline-none transition-all"
-                            placeholder="0"
-                        />
-                    </div>
                 </div>
 
                 {/* Image Toggle */}
@@ -307,7 +338,8 @@ const AddProductForm = ({ onProductAdded }) => {
                             type="button"
                             onClick={() => {
                                 setImageInputMode('upload');
-                                setFormData(prev => ({ ...prev, image_url: '' }));
+                                setFormData(prev => ({ ...prev, product_image: '' }));
+                                setImagePreview('');
                             }}
                             className={`px-6 py-2 rounded-full font-semibold transition-all ${imageInputMode === 'upload'
                                 ? 'bg-blush-rose text-white'
@@ -321,8 +353,8 @@ const AddProductForm = ({ onProductAdded }) => {
                     {imageInputMode === 'url' && (
                         <input
                             type="url"
-                            name="image_url"
-                            value={formData.image_url}
+                            name="product_image"
+                            value={formData.product_image}
                             onChange={handleChange}
                             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-cotton-candy focus:ring-2 focus:ring-cotton-candy/20 outline-none transition-all"
                             placeholder="https://example.com/image.jpg"
@@ -362,19 +394,22 @@ const AddProductForm = ({ onProductAdded }) => {
                     )}
                 </div>
 
-                {/* Free Delivery */}
-                <div className="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        name="free_delivery"
-                        id="free_delivery"
-                        checked={formData.free_delivery}
-                        onChange={handleChange}
-                        className="w-5 h-5 text-cotton-candy border-gray-300 rounded focus:ring-cotton-candy"
-                    />
-                    <label htmlFor="free_delivery" className="text-sm font-semibold text-night-bordeaux cursor-pointer">
-                        Offer Free Delivery
+                {/* Delivery Option */}
+                <div>
+                    <label className="block text-sm font-semibold text-night-bordeaux mb-2">
+                        Delivery Option *
                     </label>
+                    <select
+                        name="delivery_option"
+                        value={formData.delivery_option}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-cotton-candy focus:ring-2 focus:ring-cotton-candy/20 outline-none transition-all bg-white"
+                    >
+                        <option value="Shop Pickup">Picked from the shop</option>
+                        <option value="Free Delivery">Free Delivery</option>
+                        <option value="Paid Delivery">Paid Delivery (By Customer)</option>
+                    </select>
                 </div>
 
                 <button
