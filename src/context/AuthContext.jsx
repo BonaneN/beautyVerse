@@ -10,22 +10,36 @@ export const AuthProvider = ({ children }) => {
     // Check if user is already logged in?
     useEffect(() => {
         const token = localStorage.getItem('access_token');
+        const username = localStorage.getItem('username');
         if (token) {
-            setUser({ loggedIn: true });
+            setUser({
+                loggedIn: true,
+                username: username,
+                isAdmin: username === 'admin'
+            });
         }
         setLoading(false);
+
+        const handleAuthError = () => {
+            logout();
+        };
+        window.addEventListener('auth-401', handleAuthError);
+        return () => window.removeEventListener('auth-401', handleAuthError);
     }, []);
 
 
     // Login user and save tokens to localStorage
     const login = async (username, password) => {
         try {
-            const data = await api.post('/beautyVerse/users/token/', { username, password });
+            const data = await api.post('/users/login-user/', { username, password });
 
             if (data.access) {
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('refresh_token', data.refresh);
-                setUser({ loggedIn: true, username });
+                localStorage.setItem('username', username);
+
+                const isAdmin = username === 'admin';
+                setUser({ loggedIn: true, username, isAdmin });
                 return { success: true };
             }
             throw new Error('Invalid login response');
@@ -38,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     // Register a new account
     const register = async (userData) => {
         try {
-            await api.post('/beautyVerse/users/create-account/', userData);
+            await api.post('/users/create-account/', userData);
             return { success: true };
         } catch (error) {
             return { success: false, message: error.message };
@@ -50,6 +64,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('username');
         setUser(null);
     };
 
