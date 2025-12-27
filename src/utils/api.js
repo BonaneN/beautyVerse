@@ -1,6 +1,6 @@
 // Handles base URL, auth tokens from localStorage, and standardizes requests.
 
-const BASE_URL = 'https://bonane00.pythonanywhere.com';
+const BASE_URL = 'https://bonane00.pythonanywhere.com/beautyVerse';
 
 const api = {
     async request(endpoint, options = {}) {
@@ -24,6 +24,7 @@ const api = {
             if (response.status === 401) {
                 console.warn('Session expired. Redirecting to login...');
                 localStorage.removeItem('access_token');
+                window.dispatchEvent(new Event('auth-401'));
             }
 
             // Return empty object for 204 No Content
@@ -33,12 +34,26 @@ const api = {
             const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-                throw new Error(data.detail || data.error || 'Something went wrong');
+                let errorMessage = data.detail || data.error;
+
+                // If no detail/error, try to find the first field error
+                if (!errorMessage && typeof data === 'object') {
+                    const firstKey = Object.keys(data)[0];
+                    if (firstKey) {
+                        const firstError = data[firstKey];
+                        errorMessage = `${firstKey}: ${Array.isArray(firstError) ? firstError[0] : firstError}`;
+                    }
+                }
+
+                const error = new Error(errorMessage || 'Something went wrong');
+                error.data = data;
+                throw error;
             }
 
             return data;
         } catch (error) {
             console.error(`API Error [${options.method || 'GET'} ${endpoint}]:`, error.message);
+            if (error.data) console.error('Full Error Data:', error.data);
             throw error;
         }
     },
@@ -74,6 +89,14 @@ const api = {
     delete(endpoint, headers = {}) {
         return this.request(endpoint, { method: 'DELETE', headers });
     },
+
+    getImageUrl(path) {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        // The base domain for media files on this server
+        const baseUrl = 'https://bonane00.pythonanywhere.com';
+        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+    }
 };
 
 export default api;
