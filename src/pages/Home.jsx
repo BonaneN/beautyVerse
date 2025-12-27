@@ -7,10 +7,10 @@ const Home = () => {
     const images = {
         hero: "https://plus.unsplash.com/premium_photo-1661404164814-9d3c137097aa?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         services: {
-            hair: "C:/Users/HP/.gemini/antigravity/brain/82e89ca1-feab-4c56-82c1-25c82dd4bd59/service_hair_styling_1766484006561.png",
-            makeup: "C:/Users/HP/.gemini/antigravity/brain/82e89ca1-feab-4c56-82c1-25c82dd4bd59/service_makeup_1766484030185.png",
-            skincare: "C:/Users/HP/.gemini/antigravity/brain/82e89ca1-feab-4c56-82c1-25c82dd4bd59/service_skincare_1766484061867.png",
-            nails: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400" // Placeholder
+            hair: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800",
+            makeup: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800",
+            skincare: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
+            nails: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800"
         },
         products: {
             skincare: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400",

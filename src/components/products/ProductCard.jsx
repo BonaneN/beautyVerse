@@ -55,8 +55,9 @@ const ProductCard = ({ product, index = 0, onClick }) => {
                                 <motion.div
                                     initial={{ x: -20, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
-                                    className="px-3 py-1 bg-berry-crush text-white text-[10px] font-black rounded-full shadow-lg backdrop-blur-md"
+                                    className="px-4 py-1.5 bg-gradient-to-r from-blush-rose to-berry-crush text-white text-[11px] font-black rounded-full shadow-xl flex items-center gap-1.5"
                                 >
+                                    <span className="animate-pulse w-1.5 h-1.5 bg-white rounded-full"></span>
                                     {discountPercentage}% OFF
                                 </motion.div>
                             )}
