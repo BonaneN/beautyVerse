@@ -83,6 +83,9 @@ const Navbar = () => {
                     <div className="flex-none w-full lg:w-auto pt-8 lg:pt-0 border-t lg:border-0 border-soft-apricot">
                         {user ? (
                             <div className="flex items-center gap-6">
+                                {user.isAdmin && (
+                                    <NavLink to="/admin" className="text-sm font-bold text-blush-rose hover:text-berry-crush transition-colors" onClick={() => setIsOpen(false)}>Admin</NavLink>
+                                )}
                                 <NavLink to="/dashboard" className="text-sm font-medium text-night-bordeaux hover:text-blush-rose transition-colors" onClick={() => setIsOpen(false)}>Dashboard</NavLink>
                                 <button
                                     onClick={() => { logout(); setIsOpen(false); }}
