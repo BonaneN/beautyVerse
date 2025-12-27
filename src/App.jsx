@@ -9,6 +9,9 @@ import Products from './pages/Products';
 import Services from './pages/Services';
 import Professionals from './pages/Professionals';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import ProductDetails from './pages/ProductDetails';
+import ProfessionalDetails from './pages/ProfessionalDetails';
 import NotFound from './pages/NotFound';
 
 // Components
@@ -29,8 +32,9 @@ function App() {
               <Route path="/login" element={<Auth initialMode="login" />} />
               <Route path="/register" element={<Auth initialMode="register" />} />
               <Route path="/products" element={<Products />} />
-              <Route path="/services" element={<Services />} />
               <Route path="/professionals" element={<Professionals />} />
+              <Route path="/professionals/:id" element={<ProfessionalDetails />} />
+              <Route path="/services" element={<Services />} />
 
               {/* Protected Routes for registered users */}
               <Route
@@ -38,6 +42,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute minRole="admin">
+                    <AdminDashboard />
                   </ProtectedRoute>
                 }
               />
