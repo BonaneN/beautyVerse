@@ -5,58 +5,58 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --color-soft-apricot: #F9DBBD;
-    --color-cotton-candy: #FFA5AB;
-    --color-blush-rose: #DA627D;
-    --color-berry-crush: #A53860;
-    --color-night-bordeaux: #450920;
-  }
+    :root {
+        --color-soft-apricot: #F9DBBD;
+        --color-cotton-candy: #FFA5AB;
+        --color-blush-rose: #DA627D;
+        --color-berry-crush: #A53860;
+        --color-night-bordeaux: #450920;
+    }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    @apply text-night-bordeaux bg-white min-h-screen antialiased;
-  }
+    body {
+        font-family: 'Inter', sans-serif;
+        @apply text-night-bordeaux bg-white min-h-screen antialiased;
+    }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: 'Outfit', sans-serif;
-    @apply text-night-bordeaux leading-tight mb-4;
-  }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Outfit', sans-serif;
+        @apply text-night-bordeaux leading-tight mb-4;
+    }
 
-  a {
-    @apply font-medium text-berry-crush transition-all duration-300 ease-in-out hover:text-blush-rose;
-  }
+    a {
+        @apply font-medium text-berry-crush transition-all duration-300 ease-in-out hover:text-blush-rose;
+    }
 }
 
 @layer components {
-  .btn-primary {
-    @apply px-6 py-3 rounded-xl font-semibold bg-cotton-candy text-night-bordeaux shadow-md transition-all duration-300 hover:bg-blush-rose hover:text-white hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0;
-  }
+    .btn-primary {
+        @apply px-6 py-3 rounded-xl font-semibold bg-cotton-candy text-night-bordeaux shadow-md transition-all duration-300 hover:bg-blush-rose hover:text-white hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0;
+    }
 
-  .container-custom {
-    @apply max-w-[1200px] mx-auto px-6;
-  }
+    .container-custom {
+        @apply max-w-[1200px] mx-auto px-6;
+    }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: white;
+    background: white;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-cotton-candy);
-  border-radius: 10px;
+    background: var(--color-cotton-candy);
+    border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-blush-rose);
+    background: var(--color-blush-rose);
 }
