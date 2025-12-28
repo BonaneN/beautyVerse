@@ -8,6 +8,7 @@ const Auth = ({ initialMode = 'login' }) => {
         username: '',
         email: '',
         password: '',
+        password2: '',
         first_name: '',
         last_name: ''
     });
@@ -56,12 +57,19 @@ const Auth = ({ initialMode = 'login' }) => {
                     setError(result.message || 'Login failed');
                 }
             } else {
-                if (!formData.username || !formData.email || !formData.password || !formData.first_name) {
+                if (!formData.username || !formData.email || !formData.password || !formData.password2) {
                     setError('All fields are required for registration');
                     setLoading(false);
                     return;
                 }
-                const result = await register(formData);
+
+                const registrationData = {
+                    ...formData,
+                    first_name: formData.username,
+                    last_name: formData.username
+                };
+
+                const result = await register(registrationData);
                 if (result.success) {
                     setIsLogin(true);
                     setError('Account created! Please sign in.');
@@ -86,7 +94,6 @@ const Auth = ({ initialMode = 'login' }) => {
                     <form onSubmit={handleSubmit} className="bg-white flex flex-col items-center justify-center px-12 h-full text-center">
                         <h1 className="font-heading font-bold text-3xl mb-6 text-night-bordeaux">Create Account</h1>
                         <span className="text-sm text-gray-600 mb-6">Enter your details to get started</span>
-
                         <input
                             type="text"
                             name="username"
@@ -110,6 +117,15 @@ const Auth = ({ initialMode = 'login' }) => {
                             name="password"
                             placeholder="Password"
                             value={formData.password}
+                            onChange={handleChange}
+                            autoComplete="new-password"
+                            className="bg-gray-100 border border-gray-200 focus:border-cotton-candy focus:ring-2 focus:ring-cotton-candy/20 outline-none p-3 my-2 w-full rounded-lg transition-all"
+                        />
+                        <input
+                            type="password"
+                            name="password2"
+                            placeholder="Confirm Password"
+                            value={formData.password2}
                             onChange={handleChange}
                             autoComplete="new-password"
                             className="bg-gray-100 border border-gray-200 focus:border-cotton-candy focus:ring-2 focus:ring-cotton-candy/20 outline-none p-3 my-2 w-full rounded-lg transition-all"
