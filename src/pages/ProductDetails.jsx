@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const ProductDetailsModal = ({ productId, onClose }) => {
     const { user } = useAuth();
@@ -9,6 +10,10 @@ const ProductDetailsModal = ({ productId, onClose }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const { addToCart, cartItems } = useCart();
+
+    const cartItem = cartItems.find(item => item.id === productId);
+    const quantityInCart = cartItem ? cartItem.quantity : 0;
 
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -184,13 +189,18 @@ const ProductDetailsModal = ({ productId, onClose }) => {
                                         </div>
                                     </div>
 
-                                    {/* Actions */}
                                     <div className="pt-4 flex flex-col gap-4">
-                                        <button className="w-full h-16 bg-night-bordeaux text-white rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-4 hover:bg-night-bordeaux/90 transition-all shadow-xl hover:-translate-y-1">
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                            </svg>
-                                            Add to Beauty Bag
+                                        <button
+                                            onClick={() => addToCart(product)}
+                                            className="w-full h-16 bg-night-bordeaux text-white rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-4 hover:bg-night-bordeaux/90 transition-all shadow-xl hover:-translate-y-1 relative group overflow-hidden"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-blush-rose/20 to-berry-crush/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                                            <div className="relative flex items-center gap-4">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                                </svg>
+                                                <span>{quantityInCart > 0 ? `Add More (${quantityInCart} in bag)` : 'Add to Beauty Bag'}</span>
+                                            </div>
                                         </button>
 
                                         {user && user.isAdmin && (

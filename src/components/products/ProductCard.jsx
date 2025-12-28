@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import api from '../../utils/api';
+import { useCart } from '../../context/CartContext';
 
 const ProductCard = ({ product, index = 0, onClick }) => {
     const {
@@ -13,6 +14,15 @@ const ProductCard = ({ product, index = 0, onClick }) => {
         category,
         delivery_option
     } = product;
+
+    const { addToCart, cartItems } = useCart();
+    const cartItem = cartItems.find(item => item.id === id);
+    const quantity = cartItem ? cartItem.quantity : 0;
+
+    const handleAddToCart = (e) => {
+        e.stopPropagation();
+        addToCart(product);
+    };
 
     const hasDiscount = discount_percentage > 0;
     const discountPercentage = Math.round(discount_percentage);
@@ -121,11 +131,26 @@ const ProductCard = ({ product, index = 0, onClick }) => {
                             )}
                         </div>
 
-                        <div className="w-10 h-10 rounded-xl bg-night-bordeaux text-white flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-xl group-hover:bg-blush-rose">
+                        <button
+                            onClick={handleAddToCart}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transform transition-all duration-500 shadow-xl relative ${quantity > 0
+                                ? 'bg-blush-rose text-white scale-110 rotate-6'
+                                : 'bg-night-bordeaux text-white hover:scale-110 hover:rotate-6 hover:bg-blush-rose'
+                                }`}
+                        >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
-                        </div>
+                            {quantity > 0 && (
+                                <motion.span
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute -top-2 -right-2 w-5 h-5 bg-berry-crush text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white"
+                                >
+                                    {quantity}
+                                </motion.span>
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
