@@ -7,7 +7,8 @@ const api = {
         const token = localStorage.getItem('access_token');
 
         const headers = {
-            'Content-Type': 'application/json',
+            // Only set Content-Type for non-FormData requests
+            ...(!(options.body instanceof FormData) && { 'Content-Type': 'application/json' }),
             ...(token && { 'Authorization': `Bearer ${token}` }),
             ...options.headers,
         };

@@ -73,7 +73,6 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
         setSuccess('');
 
         try {
-            const token = localStorage.getItem('access_token');
             const formDataToSend = new FormData();
 
             // Basic Info
@@ -86,7 +85,7 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
             if (formData.tiktok) formDataToSend.append('tiktok', formData.tiktok);
             if (formData.bio) formDataToSend.append('bio', formData.bio);
 
-            // Specialities & Availability (as strings/json if backend supports, otherwise mapping is needed)
+            // Specialities & Availability
             formDataToSend.append('categories', JSON.stringify(specialties));
             formDataToSend.append('availability_slots', JSON.stringify(slots));
 
@@ -94,24 +93,36 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                 formDataToSend.append('profile_picture', imageFile);
             }
 
-            const res = await fetch('https://bonane00.pythonanywhere.com/beautyVerse/artists/register-artist/', {
+            // Use api utility with FormData - need to use request method directly
+            const token = localStorage.getItem('access_token');
+            const response = await api.request('/artists/register-artist/', {
                 method: 'POST',
                 headers: {
+                    // Don't set Content-Type for FormData - browser will set it with boundary
                     ...(token && { 'Authorization': `Bearer ${token}` })
                 },
                 body: formDataToSend
             });
 
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.detail || errorData.error || 'Registration failed');
-            }
-
-            const response = await res.json();
             setSuccess('Artist profile created successfully!');
             if (onArtistAdded) onArtistAdded(response);
 
-            // Reset logic
+            // Reset form
+            setFormData({
+                name: '',
+                brand_name: '',
+                phone: '',
+                whatsapp_contact: '',
+                location: '',
+                instagram: '',
+                tiktok: '',
+                bio: '',
+                profile_picture: null
+            });
+            setSpecialties([]);
+            setSlots([]);
+            setImageFile(null);
+            setImagePreview('');
         } catch (err) {
             setError(err.message || 'Failed to register artist');
         } finally {
@@ -201,8 +212,8 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                                         key={cat} type="button"
                                         onClick={() => handleCategoryToggle(cat)}
                                         className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border ${specialties.includes(cat)
-                                                ? 'bg-night-bordeaux text-white border-night-bordeaux'
-                                                : 'bg-white text-gray-400 border-gray-100 hover:border-soft-apricot'
+                                            ? 'bg-night-bordeaux text-white border-night-bordeaux'
+                                            : 'bg-white text-gray-400 border-gray-100 hover:border-soft-apricot'
                                             }`}
                                     >
                                         {cat}
