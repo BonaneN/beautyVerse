@@ -59,8 +59,8 @@ const Professionals = () => {
                             <button
                                 onClick={() => setShowAddForm(!showAddForm)}
                                 className={`px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-premium hover:shadow-2xl hover:-translate-y-1 ${showAddForm
-                                        ? 'bg-night-bordeaux text-white'
-                                        : 'bg-gradient-to-r from-blush-rose to-berry-crush text-white'
+                                    ? 'bg-night-bordeaux text-white'
+                                    : 'bg-gradient-to-r from-blush-rose to-berry-crush text-white'
                                     }`}
                             >
                                 {showAddForm ? 'View Directory' : 'Become an Artist'}
@@ -153,11 +153,16 @@ const Professionals = () => {
                                         </span>
                                         <h3 className="text-2xl font-heading font-black text-white mb-3">{artist.name}</h3>
                                         <div className="flex gap-2 flex-wrap">
-                                            {(Array.isArray(artist.specialties) ? artist.specialties : typeof artist.specialties === 'string' ? artist.specialties.split(',') : ['Artist']).slice(0, 2).map(tag => (
-                                                <span key={tag} className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
-                                                    {tag.trim()}
+                                            {(artist.categories || []).slice(0, 3).map((category, idx) => (
+                                                <span key={idx} className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
+                                                    {category.name || category}
                                                 </span>
                                             ))}
+                                            {(!artist.categories || artist.categories.length === 0) && (
+                                                <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
+                                                    Artist
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
