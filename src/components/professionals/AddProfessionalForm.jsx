@@ -17,16 +17,13 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
         location: '',
         instagram: '',
         tiktok: '',
-        bio: '', // Bio is still useful although not in the provided model snippet, keeping it for the profile
         profile_picture: null
     });
 
-    const [specialties, setSpecialties] = useState([]); // Category selection
-
-    // Availability slots management
-    const [slots, setSlots] = useState([]); // [{ date: '', time: '' }]
+    const [specialties, setSpecialties] = useState([]); 
+    const [homeServices, setHomeServices] = useState({}); 
+    const [slots, setSlots] = useState([]); 
     const [currentSlot, setCurrentSlot] = useState({ date: '', time: '' });
-
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [loading, setLoading] = useState(false);
@@ -75,7 +72,6 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
         try {
             const formDataToSend = new FormData();
 
-            // Basic Info
             formDataToSend.append('name', formData.name);
             if (formData.brand_name) formDataToSend.append('brand_name', formData.brand_name);
             if (formData.phone) formDataToSend.append('phone', formData.phone);
@@ -83,22 +79,39 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
             formDataToSend.append('location', formData.location);
             if (formData.instagram) formDataToSend.append('instagram', formData.instagram);
             if (formData.tiktok) formDataToSend.append('tiktok', formData.tiktok);
-            if (formData.bio) formDataToSend.append('bio', formData.bio);
 
-            // Specialities & Availability
-            formDataToSend.append('categories', JSON.stringify(specialties));
-            formDataToSend.append('availability_slots', JSON.stringify(slots));
+            const serviceObjects = specialties.map(cat => ({
+                category: cat,
+                is_home_service: homeServices[cat] || false
+            }));
+
+            formDataToSend.append('services', JSON.stringify(serviceObjects));
+
+            serviceObjects.forEach((svc, i) => {
+                formDataToSend.append(`services[${i}]category`, svc.category);
+                formDataToSend.append(`services[${i}]is_home_service`, svc.is_home_service);
+            });
+
+            formDataToSend.append('available_slots', JSON.stringify(slots));
+            slots.forEach((slot, index) => {
+                formDataToSend.append(`available_slots[${index}]date`, slot.date);
+                formDataToSend.append(`available_slots[${index}]time`, slot.time);
+            });
 
             if (imageFile) {
                 formDataToSend.append('profile_picture', imageFile);
             }
 
-            // Use api utility with FormData - need to use request method directly
+            console.log('--- FORM SUBMISSION START ---');
+            for (let pair of formDataToSend.entries()) {
+                console.log(`FormData: ${pair[0]} = ${pair[1]}`);
+            }
+            console.log('--- FORM SUBMISSION END ---');
+
             const token = localStorage.getItem('access_token');
             const response = await api.request('/artists/register-artist/', {
                 method: 'POST',
                 headers: {
-                    // Don't set Content-Type for FormData - browser will set it with boundary
                     ...(token && { 'Authorization': `Bearer ${token}` })
                 },
                 body: formDataToSend
@@ -120,6 +133,7 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                 profile_picture: null
             });
             setSpecialties([]);
+            setHomeServices({});
             setSlots([]);
             setImageFile(null);
             setImagePreview('');
@@ -133,12 +147,12 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-12">
             <div>
-                <h2 className="text-3xl font-heading font-black text-night-bordeaux mb-2">Join the Visionaries</h2>
-                <p className="text-gray-500 font-medium">Align your artistry with our exclusive directory.</p>
+                <h2 className="text-3xl font-heading font-black text-night-bordeaux mb-2">Join the artistic profiles</h2>
+                <p className="text-gray-500 font-medium">Align your artistry with our exclusive artist professionals.</p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-12">
-                {/* 1. Identity & Contact */}
+                {/* 1. Identity and contact information*/}
                 <div className="space-y-8">
                     <div className="p-8 bg-soft-apricot/5 rounded-3xl border border-soft-apricot/10">
                         <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-6">1. Identity & Contact</h3>
@@ -154,59 +168,68 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                                 )}
                             </div>
                             <label className="cursor-pointer px-6 py-3 bg-white text-night-bordeaux text-xs font-black uppercase tracking-widest rounded-xl border border-gray-200 hover:shadow-lg transition-all">
-                                Upload Photo
+                                Upload profile
                                 <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                             </label>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Stage Name *</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Artist name *</label>
                                 <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="Bella Glow" />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Studio / Brand</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Studio name</label>
                                 <input type="text" name="brand_name" value={formData.brand_name} onChange={handleChange} className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="Glow Sanctuary" />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Phone</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Phone contact</label>
                                 <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="+250..." />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">WhatsApp Contact</label>
-                                <input type="text" name="whatsapp_contact" value={formData.whatsapp_contact} onChange={handleChange} className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="+250..." />
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">WhatsApp contact</label>
+                                <div className="flex gap-2">
+                                    <input type="text" name="whatsapp_contact" value={formData.whatsapp_contact} onChange={handleChange} className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="+250..." />
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, whatsapp_contact: prev.phone }))}
+                                        className="px-4 py-2 bg-gray-100 text-[10px] font-black uppercase text-gray-500 rounded-xl hover:bg-gray-200"
+                                    >
+                                        Same as phone
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div className="mt-6">
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Sanctuary Location *</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Location *</label>
                             <input type="text" name="location" value={formData.location} onChange={handleChange} required className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="Kigali, Rwanda" />
                         </div>
                     </div>
 
                     <div className="p-8 bg-soft-apricot/5 rounded-3xl border border-soft-apricot/10">
-                        <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-6">Social Influence</h3>
+                        <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-6">Social media platforms</h3>
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Instagram URL</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Instagram link</label>
                                 <input type="url" name="instagram" value={formData.instagram} onChange={handleChange} className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="https://instagram.com/..." />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">TikTok URL</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">TikTok link</label>
                                 <input type="url" name="tiktok" value={formData.tiktok} onChange={handleChange} className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm" placeholder="https://tiktok.com/@..." />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. Expertise & Availability */}
+                {/* 2. Expertise and availability */}
                 <div className="space-y-8">
                     <div className="p-8 bg-soft-apricot/5 rounded-3xl border border-soft-apricot/10">
-                        <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-6">2. Expertise & Availability</h3>
+                        <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-6">2. Expertise and availability</h3>
 
                         <div className="mb-8">
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Service Categories *</label>
-                            <div className="flex flex-wrap gap-2">
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Service categories *</label>
+                            <div className="flex flex-wrap gap-2 mb-6">
                                 {categories.map(cat => (
                                     <button
                                         key={cat} type="button"
@@ -220,10 +243,41 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                                     </button>
                                 ))}
                             </div>
+
+                            {/* Home Service Toggle */}
+                            <AnimatePresence>
+                                {specialties.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="space-y-3"
+                                    >
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Configure services (Home Service?)</label>
+                                        {specialties.map(cat => (
+                                            <div key={cat} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                                                <span className="font-bold text-sm text-night-bordeaux">{cat}</span>
+                                                <label className="flex items-center gap-3 cursor-pointer group">
+                                                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-blush-rose transition-colors uppercase">Home Service</span>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={homeServices[cat] || false}
+                                                            onChange={(e) => setHomeServices(prev => ({ ...prev, [cat]: e.target.checked }))}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blush-rose"></div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Availability Slots</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Availability date and time slots </label>
                             <div className="flex gap-4 mb-6">
                                 <div className="flex-1">
                                     <input type="date" value={currentSlot.date} onChange={(e) => setCurrentSlot(s => ({ ...s, date: e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-white border border-gray-100 font-bold text-xs" />
@@ -251,13 +305,9 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                             </div>
                         </div>
                     </div>
-
-                    <div className="p-8 bg-soft-apricot/5 rounded-3xl border border-soft-apricot/10">
-                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Short Philosophy</label>
-                        <textarea name="bio" value={formData.bio} onChange={handleChange} rows="3" className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 focus:border-blush-rose outline-none transition-all font-bold text-sm resize-none" placeholder="Share your artistic vision..." />
-                    </div>
                 </div>
             </div>
+
 
             {error && <p className="p-6 bg-berry-crush/5 text-berry-crush text-[10px] font-black uppercase tracking-widest rounded-2xl border border-berry-crush/10 text-center">{error}</p>}
             {success && <p className="p-6 bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest rounded-2xl border border-green-100 text-center">{success}</p>}
@@ -268,7 +318,7 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                     disabled={loading}
                     className="px-12 py-5 bg-night-bordeaux text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center gap-4"
                 >
-                    {loading ? 'Submitting Registry...' : 'Engrave on Directory'}
+                    {loading ? 'Submitting Registry...' : 'Become the artist'}
                     {!loading && (
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -276,7 +326,7 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                     )}
                 </button>
             </div>
-        </form>
+        </form >
     );
 };
 

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import AddProfessionalForm from '../components/professionals/AddProfessionalForm';
-import ProfessionalDetailsModal from './ProfessionalDetails'; // We'll convert this to a modal
+import ProfessionalDetailsModal from './ProfessionalDetails';
 
 const Professionals = () => {
     const { user } = useAuth();
@@ -18,7 +18,23 @@ const Professionals = () => {
         try {
             setLoading(true);
             const data = await api.get('/artists/list-artists/');
-            setArtists(data || []);
+
+            const parsedData = (data || []).map(artist => {
+                let services = artist.services || artist.categories || [];
+                let slots = artist.available_slots || [];
+
+                if (typeof services === 'string') {
+                    try { services = JSON.parse(services); } catch (e) { console.error('Failed to parse services', e); services = []; }
+                }
+                if (typeof slots === 'string') {
+                    try { slots = JSON.parse(slots); } catch (e) { console.error('Failed to parse slots', e); slots = []; }
+                }
+
+                return { ...artist, services, available_slots: slots };
+            });
+
+            setArtists(parsedData);
+
         } catch (err) {
             setError(err.message || 'Failed to fetch professionals');
         } finally {
@@ -45,10 +61,10 @@ const Professionals = () => {
                     transition={{ duration: 0.8 }}
                 >
                     <span className="inline-block px-4 py-1.5 bg-soft-apricot/30 border border-soft-apricot rounded-full text-[10px] font-black uppercase tracking-[0.3em] text-blush-rose mb-6">
-                        The Beauty Visionaries
+                        The Beauty Artists
                     </span>
                     <h1 className="text-5xl md:text-6xl font-heading font-black text-night-bordeaux mb-4">
-                        Our Professionals
+                        Our professionals
                     </h1>
                     <p className="text-gray-500 max-w-2xl mx-auto font-medium mb-12">
                         Connect with first-class service providers meticulously curated for your unique essence.
@@ -63,7 +79,7 @@ const Professionals = () => {
                                     : 'bg-gradient-to-r from-blush-rose to-berry-crush text-white'
                                     }`}
                             >
-                                {showAddForm ? 'View Directory' : 'Become an Artist'}
+                                {showAddForm ? 'View Artists' : 'Become an Artist'}
                             </button>
                         ) : (
                             <Link
@@ -121,8 +137,7 @@ const Professionals = () => {
 
                 {!loading && !error && artists.length === 0 && (
                     <div className="text-center py-24 bg-white rounded-[3rem] border-2 border-dashed border-gray-100 shadow-sm">
-                        <div className="w-20 h-20 bg-soft-apricot/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">🎨</div>
-                        <h3 className="text-2xl font-black text-night-bordeaux mb-2">Directory is Empty</h3>
+                        <h3 className="text-2xl font-black text-night-bordeaux mb-2">Artist list is empty</h3>
                         <p className="text-gray-400 mb-8 max-w-sm mx-auto font-medium">Be the pioneer artist on BeautyVerse and start your journey today.</p>
                         <button onClick={() => setShowAddForm(true)} className="text-blush-rose font-black uppercase tracking-widest text-xs hover:underline underline-offset-8">Join the Visionaries →</button>
                     </div>
@@ -153,16 +168,26 @@ const Professionals = () => {
                                         </span>
                                         <h3 className="text-2xl font-heading font-black text-white mb-3">{artist.name}</h3>
                                         <div className="flex gap-2 flex-wrap">
-                                            {(artist.categories || []).slice(0, 3).map((category, idx) => (
-                                                <span key={idx} className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
-                                                    {category.name || category}
-                                                </span>
-                                            ))}
-                                            {(!artist.categories || artist.categories.length === 0) && (
-                                                <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
-                                                    Artist
-                                                </span>
-                                            )}
+                                            {(() => {
+                                                const categories = (artist.categories && artist.categories.length > 0)
+                                                    ? artist.categories
+                                                    : (artist.specialties || []);
+
+                                                return (
+                                                    <>
+                                                        {categories.slice(0, 3).map((category, idx) => (
+                                                            <span key={idx} className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
+                                                                {category.name || category}
+                                                            </span>
+                                                        ))}
+                                                        {categories.length === 0 && (
+                                                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
+                                                                Artist
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
 
