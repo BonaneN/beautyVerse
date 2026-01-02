@@ -20,9 +20,9 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
         profile_picture: null
     });
 
-    const [specialties, setSpecialties] = useState([]); 
-    const [homeServices, setHomeServices] = useState({}); 
-    const [slots, setSlots] = useState([]); 
+    const [specialties, setSpecialties] = useState([]);
+    const [homeServices, setHomeServices] = useState({});
+    const [slots, setSlots] = useState([]);
     const [currentSlot, setCurrentSlot] = useState({ date: '', time: '' });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
