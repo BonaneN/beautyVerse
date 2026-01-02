@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { BookingProvider } from './context/BookingContext';
 
 // Pages
 import Home from './pages/Home';
@@ -13,6 +14,7 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
+import Appointments from './pages/Appointments';
 import ProfessionalDetails from './pages/ProfessionalDetails';
 import NotFound from './pages/NotFound';
 
@@ -24,48 +26,58 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <Router>
-          <div className="app-container">
-            <Navbar />
-            <main className="app-main">
-              <Routes>
-                {/* Publicly accessible Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Auth initialMode="login" />} />
-                <Route path="/register" element={<Auth initialMode="register" />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/professionals" element={<Professionals />} />
-                <Route path="/professionals/:id" element={<ProfessionalDetails />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/cart" element={<Cart />} />
+      <BookingProvider>
+        <CartProvider>
+          <Router>
+            <div className="app-container">
+              <Navbar />
+              <main className="app-main">
+                <Routes>
+                  {/* Publicly accessible Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Auth initialMode="login" />} />
+                  <Route path="/register" element={<Auth initialMode="register" />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/professionals" element={<Professionals />} />
+                  <Route path="/professionals/:id" element={<ProfessionalDetails />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route
+                    path="/appointments"
+                    element={
+                      <ProtectedRoute>
+                        <Appointments />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Protected Routes for registered users */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute minRole="admin">
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected Routes for registered users */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute minRole="admin">
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* 404 Route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </Router>
-      </CartProvider>
+                  {/* 404 Route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+        </CartProvider>
+      </BookingProvider>
     </AuthProvider>
   );
 }

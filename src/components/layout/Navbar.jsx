@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useBooking } from '../../context/BookingContext';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
     const { totalItems } = useCart();
+    const { upcomingCount } = useBooking();
     const [isOpen, setIsOpen] = useState(false);
-    const appointmentCount = 0;
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -41,9 +42,9 @@ const Navbar = () => {
                                 <line x1="8" y1="2" x2="8" y2="6"></line>
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
-                            {appointmentCount >= 0 && (
+                            {upcomingCount > 0 && (
                                 <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-blush-rose text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white px-1">
-                                    {appointmentCount}
+                                    {upcomingCount}
                                 </span>
                             )}
                         </Link>
