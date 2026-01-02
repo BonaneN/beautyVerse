@@ -2,57 +2,61 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import ProfessionalDetailsModal from './ProfessionalDetails';
 
 const services = [
-    { title: 'Hair Styling', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800', desc: 'Expert cuts, coloring, and styling for every hair type.', specialtyKeyword: 'Hair' },
-    { title: 'Makeup Artistry', image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800', desc: 'Flawless makeup for weddings, events, and photoshoots.', specialtyKeyword: 'Makeup' },
-    { title: 'Skincare', image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800', desc: 'Rejuvenating facials and clinical skincare treatments.', specialtyKeyword: 'Skin' },
-    { title: 'Nail Care', image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800', desc: 'Luxury manicures and pedicures with a creative touch.', specialtyKeyword: 'Nail' }
+    { title: 'Hair Styling', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800', desc: 'Expert cuts, coloring, and styling for every hair type.', categories: ['Hair', 'Barber'] },
+    { title: 'Makeup Artistry', image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800', desc: 'Flawless makeup for weddings, events, and photoshoots.', categories: ['Makeup', 'Lashes & Brows'] },
+    { title: 'Skincare', image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800', desc: 'Rejuvenating facials and clinical skincare treatments.', categories: ['Spa & Massage', 'Skincare'] },
+    { title: 'Nail Care', image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800', desc: 'Luxury manicures and pedicures with a creative touch.', categories: ['Nails', 'Henna'] }
 ];
 
-const ArtistCard = ({ artist, index }) => {
-    // Fallback specialties if null
-    const displaySpecialties = Array.isArray(artist.specialties)
-        ? artist.specialties
-        : (typeof artist.specialties === 'string' ? artist.specialties.split(',').map(s => s.trim()) : ['Artist']);
+const ArtistCard = ({ artist, index, onClick }) => {
+    // Standardizing the services/categories data
+    const serviceList = (artist.services || [])
+        .map(s => typeof s === 'object' ? s.category : s)
+        .filter(Boolean);
+
+    const displaySpecialties = serviceList.length > 0
+        ? serviceList
+        : (artist.categories || artist.specialties || []);
 
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
-            className="group relative"
+            className="group relative cursor-pointer"
+            onClick={onClick}
         >
-            <Link to={`/professionals/${artist.id}`} className="block">
-                <div className="aspect-[3/4] rounded-[2rem] overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-all duration-500 border border-gray-100">
-                    <img
-                        src={artist.profile_picture || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400'}
-                        alt={artist.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-night-bordeaux/90 via-night-bordeaux/20 to-transparent" />
+            <div className="aspect-[3/4] rounded-[2rem] overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-all duration-500 border border-gray-100">
+                <img
+                    src={artist.profile_picture || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400'}
+                    alt={artist.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-night-bordeaux/90 via-night-bordeaux/20 to-transparent" />
 
-                    <div className="absolute bottom-6 left-6 right-6">
-                        <span className="text-[10px] font-black text-soft-apricot uppercase tracking-widest mb-1 block">
-                            {artist.brand_name || 'Glow Studio'}
-                        </span>
-                        <h3 className="text-xl font-heading font-black text-white mb-2">{artist.name}</h3>
-                        <div className="flex gap-2 flex-wrap">
-                            {displaySpecialties.slice(0, 2).map(s => (
-                                <span key={s} className="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-md text-[8px] font-black uppercase tracking-tighter text-white">
-                                    {s}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                <div className="absolute bottom-6 left-6 right-6">
+                    <span className="text-[10px] font-black text-soft-apricot uppercase tracking-widest mb-1 block">
+                        {artist.brand_name || 'Glow Studio'}
+                    </span>
+                    <h3 className="text-xl font-heading font-black text-white mb-2">{artist.name}</h3>
+                    <div className="flex gap-2 flex-wrap">
+                        {displaySpecialties.slice(0, 3).map((s, idx) => (
+                            <span key={idx} className="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-md text-[8px] font-black uppercase tracking-tighter text-white">
+                                {typeof s === 'object' ? s.name : s}
+                            </span>
+                        ))}
                     </div>
                 </div>
-            </Link>
+
+                <div className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </div>
+            </div>
         </motion.div>
     );
 };
@@ -152,13 +156,23 @@ const Services = () => {
     const [artists, setArtists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [selectedArtistId, setSelectedArtistId] = useState(null);
 
     useEffect(() => {
         const fetchArtists = async () => {
             try {
                 setLoading(true);
                 const data = await api.get('/artists/list-artists/');
-                setArtists(data || []);
+
+                const standardizedData = (data || []).map(artist => {
+                    let services = artist.services || [];
+                    if (typeof services === 'string') {
+                        try { services = JSON.parse(services); } catch (e) { services = []; }
+                    }
+                    return { ...artist, services };
+                });
+
+                setArtists(standardizedData);
             } catch (err) {
                 setError(err.message || 'Failed to fetch artists');
             } finally {
@@ -170,15 +184,12 @@ const Services = () => {
 
     const filteredArtists = selectedService
         ? artists.filter(artist => {
-            const specialties = artist.specialties;
-            const keyword = selectedService.specialtyKeyword.toLowerCase();
+            const artistCats = (artist.services || [])
+                .map(s => (typeof s === 'object' ? s.category : s).toLowerCase().trim());
 
-            if (Array.isArray(specialties)) {
-                return specialties.some(s => s.toLowerCase().includes(keyword));
-            } else if (typeof specialties === 'string') {
-                return specialties.toLowerCase().includes(keyword);
-            }
-            return false;
+            const targetCats = selectedService.categories.map(c => c.toLowerCase().trim());
+
+            return targetCats.some(tc => artistCats.includes(tc));
         })
         : [];
 
@@ -205,8 +216,8 @@ const Services = () => {
                             transition={{ delay: index * 0.1 }}
                             onClick={() => setSelectedService(selectedService?.title === service.title ? null : service)}
                             className={`aspect-[4/5] rounded-3xl transition-all duration-500 text-left relative group overflow-hidden border-4 ${selectedService?.title === service.title
-                                    ? 'border-blush-rose shadow-[0_20px_40px_-15px_rgba(183,72,104,0.3)] scale-[1.02]'
-                                    : 'border-transparent shadow-sm hover:shadow-xl hover:scale-[1.01]'
+                                ? 'border-blush-rose shadow-[0_20px_40px_-15px_rgba(183,72,104,0.3)] scale-[1.02]'
+                                : 'border-transparent shadow-sm hover:shadow-xl hover:scale-[1.01]'
                                 }`}
                         >
                             <img
@@ -263,7 +274,12 @@ const Services = () => {
                             ) : filteredArtists.length > 0 ? (
                                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                                     {filteredArtists.map((artist, index) => (
-                                        <ArtistCard key={artist.id} artist={artist} index={index} />
+                                        <ArtistCard
+                                            key={artist.id}
+                                            artist={artist}
+                                            index={index}
+                                            onClick={() => setSelectedArtistId(artist.id)}
+                                        />
                                     ))}
                                 </div>
                             ) : (
@@ -291,7 +307,12 @@ const Services = () => {
                                             </div>
                                             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                                                 {artists.map((artist, index) => (
-                                                    <ArtistCard key={artist.id} artist={artist} index={index} />
+                                                    <ArtistCard
+                                                        key={artist.id}
+                                                        artist={artist}
+                                                        index={index}
+                                                        onClick={() => setSelectedArtistId(artist.id)}
+                                                    />
                                                 ))}
                                             </div>
                                         </motion.div>
@@ -332,6 +353,16 @@ const Services = () => {
                     </div>
                 </motion.div>
             </div>
+
+            {/* Detail Modal */}
+            <AnimatePresence>
+                {selectedArtistId && (
+                    <ProfessionalDetailsModal
+                        artistId={selectedArtistId}
+                        onClose={() => setSelectedArtistId(null)}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };
