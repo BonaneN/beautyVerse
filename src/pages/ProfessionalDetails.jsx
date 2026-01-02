@@ -15,7 +15,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [bookingSuccess, setBookingSuccess] = useState(false);
     const [bookingInfo, setBookingInfo] = useState({ type: '', message: '' });
-    const { createBooking } = useBooking();
+    const { createBooking, isSlotBooked } = useBooking();
 
     useEffect(() => {
         const fetchArtistDetails = async () => {
@@ -200,19 +200,30 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                                 <div>
                                     <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-4">Open Slots</h3>
                                     <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
-                                        {artist.available_slots?.map((slot, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => setSelectedSlot(slot)}
-                                                className={`px-3 py-1.5 rounded-lg text-center transition-all border ${selectedSlot === slot
-                                                    ? 'bg-night-bordeaux text-white border-night-bordeaux shadow-md scale-105'
-                                                    : 'bg-soft-apricot/10 border-soft-apricot/20 hover:border-soft-apricot text-night-bordeaux'
-                                                    }`}
-                                            >
-                                                <p className="text-[9px] font-black">{slot.date}</p>
-                                                <p className={`text-[8px] font-bold ${selectedSlot === slot ? 'text-white/70' : 'text-gray-400'}`}>{slot.time}</p>
-                                            </button>
-                                        ))}
+                                        {artist.available_slots?.map((slot, i) => {
+                                            const isTaken = isSlotBooked(artist.id, slot.date, slot.time);
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    disabled={isTaken}
+                                                    onClick={() => setSelectedSlot(slot)}
+                                                    className={`px-3 py-1.5 rounded-lg text-center transition-all border relative ${isTaken
+                                                        ? 'bg-gray-50 border-gray-100 opacity-50 cursor-not-allowed overflow-hidden'
+                                                        : selectedSlot === slot
+                                                            ? 'bg-night-bordeaux text-white border-night-bordeaux shadow-md scale-105'
+                                                            : 'bg-soft-apricot/10 border-soft-apricot/20 hover:border-soft-apricot text-night-bordeaux'
+                                                        }`}
+                                                >
+                                                    <p className={`text-[9px] font-black ${isTaken ? 'line-through text-gray-400' : ''}`}>{slot.date}</p>
+                                                    <p className={`text-[8px] font-bold ${isTaken ? 'line-through text-gray-300' : selectedSlot === slot ? 'text-white/70' : 'text-gray-400'}`}>{slot.time}</p>
+                                                    {isTaken && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <div className="w-[110%] h-[1px] bg-berry-crush/20 rotate-[-15deg] pointer-events-none" />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
