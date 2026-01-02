@@ -102,12 +102,6 @@ const AddProfessionalForm = ({ onArtistAdded }) => {
                 formDataToSend.append('profile_picture', imageFile);
             }
 
-            console.log('--- FORM SUBMISSION START ---');
-            for (let pair of formDataToSend.entries()) {
-                console.log(`FormData: ${pair[0]} = ${pair[1]}`);
-            }
-            console.log('--- FORM SUBMISSION END ---');
-
             const token = localStorage.getItem('access_token');
             const response = await api.request('/artists/register-artist/', {
                 method: 'POST',
