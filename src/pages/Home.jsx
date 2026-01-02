@@ -44,19 +44,19 @@ const Home = () => {
                         transition={{ duration: 0.8 }}
                         className="max-w-2xl"
                     >
-                        <h1 className="text-6xl md:text-7xl lg:text-8xl font-heading font-bold text-white mb-6 leading-tight">
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold text-white mb-6 leading-tight text-center md:text-left">
                             Your Beauty,
                             <span className="block bg-gradient-to-r from-soft-apricot via-cotton-candy to-soft-apricot bg-clip-text text-transparent">
                                 Elevated
                             </span>
                         </h1>
-                        <p className="text-xl md:text-2xl text-white mb-10 font-light">
+                        <p className="text-lg md:text-2xl text-white mb-10 font-light text-center md:text-left">
                             Discover premium products and expert professionals curated for your unique beauty journey
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                             <Link
                                 to="/products"
-                                className="group px-10 py-5 bg-gradient-to-r from-cotton-candy to-blush-rose text-white rounded-full font-semibold text-lg transition-all hover:shadow-2xl hover:scale-105 hover:from-blush-rose hover:to-berry-crush flex items-center justify-center gap-2"
+                                className="group px-10 py-5 bg-gradient-to-r from-cotton-candy to-blush-rose text-white rounded-full font-bold text-lg transition-all hover:shadow-2xl hover:scale-105 hover:from-blush-rose hover:to-berry-crush flex items-center justify-center gap-2 w-full sm:w-auto min-w-[220px]"
                             >
                                 Explore Products
                                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@ const Home = () => {
                             </Link>
                             <Link
                                 to="/professionals"
-                                className="px-10 py-5 bg-white/10 backdrop-blur-sm text-white border-2 border-white/50 rounded-full font-semibold text-lg transition-all hover:bg-white hover:text-night-bordeaux hover:shadow-2xl hover:scale-105"
+                                className="px-10 py-5 bg-white/10 backdrop-blur-sm text-white border-2 border-white/50 rounded-full font-bold text-lg transition-all hover:bg-white hover:text-night-bordeaux hover:shadow-2xl hover:scale-105 w-full sm:w-auto min-w-[220px] flex items-center justify-center"
                             >
                                 Book Expert
                             </Link>

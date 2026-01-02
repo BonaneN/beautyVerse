@@ -72,37 +72,51 @@ const Products = () => {
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cotton-candy/20 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blush-rose/10 rounded-full blur-[150px] -z-10 -translate-x-1/3 translate-y-1/3" />
 
-                                {/* Filter Bar */}
+                {/* Filter Bar */}
                 <div className="sticky top-0 z-30 w-full bg-night-bordeaux/95 backdrop-blur-xl border-y border-white/10 shadow-2xl">
-                    <div className="w-full px-4 py-3 flex items-center gap-4">
+                    <div className="w-full px-4 py-4 lg:py-3 flex flex-col lg:flex-row items-center gap-4">
 
-                        {/* 1. Categories Segment (Left - 33.3%) */}
-                        <div className="w-1/3 flex items-center justify-start gap-2">
-                            <button
-                                onClick={() => setActiveCategory('All')}
-                                className={`px-3 py-2 rounded-full font-bold text-xs uppercase tracking-tight transition-all ${activeCategory === 'All'
-                                    ? 'bg-blush-rose text-white'
-                                    : 'text-gray-400 hover:text-white'
-                                    }`}
-                            >
-                                All
-                            </button>
-                            {categories.slice(0, 6).map((cat) => (
+                        {/* 1. Categories Segment */}
+                        <div className="w-full lg:w-1/3 flex items-center justify-center lg:justify-start gap-2">
+                            <div className="lg:hidden w-full">
+                                <select
+                                    value={activeCategory}
+                                    onChange={(e) => setActiveCategory(e.target.value)}
+                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blush-rose/50 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23F7B5CA%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:20px] bg-[right_12px_center] bg-no-repeat"
+                                >
+                                    <option value="All" className="text-night-bordeaux">All Categories</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.name} className="text-night-bordeaux">{cat.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="hidden lg:flex items-center gap-2">
                                 <button
-                                    key={cat.id}
-                                    onClick={() => setActiveCategory(cat.name)}
-                                    className={`px-3 py-2 rounded-full font-bold text-xs uppercase tracking-tight transition-all whitespace-nowrap ${activeCategory === cat.name
+                                    onClick={() => setActiveCategory('All')}
+                                    className={`px-3 py-2 rounded-full font-bold text-xs uppercase tracking-tight transition-all ${activeCategory === 'All'
                                         ? 'bg-blush-rose text-white'
                                         : 'text-gray-400 hover:text-white'
                                         }`}
                                 >
-                                    {cat.name}
+                                    All
                                 </button>
-                            ))}
+                                {categories.slice(0, 4).map((cat) => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setActiveCategory(cat.name)}
+                                        className={`px-3 py-2 rounded-full font-bold text-xs uppercase tracking-tight transition-all whitespace-nowrap ${activeCategory === cat.name
+                                            ? 'bg-blush-rose text-white'
+                                            : 'text-gray-400 hover:text-white'
+                                            }`}
+                                    >
+                                        {cat.name}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* 2. Search Segment (Center - 33.3%) */}
-                        <div className="w-1/3 flex justify-center">
+                        {/* 2. Search Segment */}
+                        <div className="w-full lg:w-1/3 flex justify-center">
                             <div className="relative w-full max-w-sm">
                                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                                     <svg className="w-4 h-4 text-blush-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,21 +127,32 @@ const Products = () => {
                                     type="text"
                                     value={locationSearch}
                                     onChange={(e) => setLocationSearch(e.target.value)}
-                                    placeholder="Location..."
-                                    className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blush-rose/50 transition-all"
+                                    placeholder="Search location..."
+                                    className="w-full pl-10 pr-4 py-3 lg:py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blush-rose/50 transition-all"
                                 />
                             </div>
                         </div>
 
-                        {/* 3. Delivery Segment (Right - 33.3%) */}
-                        <div className="w-1/3 flex justify-end">
-                            <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-lg">
+                        {/* 3. Delivery Segment */}
+                        <div className="w-full lg:w-1/3 flex justify-center lg:justify-end">
+                            <div className="lg:hidden w-full">
+                                <select
+                                    value={deliveryFilter}
+                                    onChange={(e) => setDeliveryFilter(e.target.value)}
+                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-400/50 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2360A5FA%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:20px] bg-[right_12px_center] bg-no-repeat"
+                                >
+                                    <option value="All" className="text-night-bordeaux">All Delivery Options</option>
+                                    <option value="Free Delivery" className="text-night-bordeaux">Free Delivery</option>
+                                    <option value="Paid Delivery" className="text-night-bordeaux">Paid Delivery</option>
+                                    <option value="Shop Pickup" className="text-night-bordeaux">Shop Pickup</option>
+                                </select>
+                            </div>
+                            <div className="hidden lg:flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-lg">
                                 <div className="flex px-2 border-r border-white/10">
                                     <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1" />
                                     </svg>
                                 </div>
-
                                 <div className="flex items-center gap-1">
                                     {[
                                         { id: 'All', label: 'All' },
