@@ -20,21 +20,21 @@ const Professionals = () => {
             const data = await api.get('/artists/list-artists/');
 
             const parsedData = (data || []).map(artist => {
-                let services = artist.services || artist.categories || [];
+                let services = artist.services || [];
                 let slots = artist.available_slots || [];
 
+                // Standardizing the services/categories data from your form
                 if (typeof services === 'string') {
-                    try { services = JSON.parse(services); } catch (e) { console.error('Failed to parse services', e); services = []; }
+                    try { services = JSON.parse(services); } catch (e) { services = []; }
                 }
                 if (typeof slots === 'string') {
-                    try { slots = JSON.parse(slots); } catch (e) { console.error('Failed to parse slots', e); slots = []; }
+                    try { slots = JSON.parse(slots); } catch (e) { slots = []; }
                 }
 
                 return { ...artist, services, available_slots: slots };
             });
 
             setArtists(parsedData);
-
         } catch (err) {
             setError(err.message || 'Failed to fetch professionals');
         } finally {
@@ -54,7 +54,7 @@ const Professionals = () => {
     return (
         <div className="min-h-screen bg-[#FCF8F4] text-night-bordeaux">
             {/* Hero Section */}
-            <div className="relative pt-32 pb-16 px-4 overflow-hidden text-center">
+            <div className="relative pt-32 pb-16 px-4 text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -86,16 +86,7 @@ const Professionals = () => {
                                 to="/login"
                                 className="px-10 py-4 bg-white border border-gray-200 text-night-bordeaux rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm hover:shadow-xl hover:-translate-y-1"
                             >
-                                Login to Join as Artist
-                            </Link>
-                        )}
-
-                        {user && user.isAdmin && (
-                            <Link
-                                to="/admin"
-                                className="px-10 py-4 bg-white border border-gray-200 text-night-bordeaux rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm hover:shadow-xl hover:-translate-y-1"
-                            >
-                                Admin Dashboard
+                                Login to Join
                             </Link>
                         )}
                     </div>
@@ -119,31 +110,13 @@ const Professionals = () => {
                     )}
                 </AnimatePresence>
 
-                {loading && (
+                {loading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="aspect-[3/4] rounded-[2.5rem] bg-gray-100 animate-pulse border border-gray-100" />
+                            <div key={i} className="aspect-[3/4] rounded-[2.5rem] bg-gray-100 animate-pulse" />
                         ))}
                     </div>
-                )}
-
-                {error && (
-                    <div className="bg-berry-crush/5 border border-berry-crush/20 text-berry-crush rounded-[2.5rem] p-12 text-center max-w-xl mx-auto shadow-sm">
-                        <h3 className="text-xl font-black mb-2">Something went wrong</h3>
-                        <p className="font-medium text-gray-500 mb-6">{error}</p>
-                        <button onClick={fetchArtists} className="px-8 py-3 bg-night-bordeaux text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:shadow-lg transition-all">Try Again</button>
-                    </div>
-                )}
-
-                {!loading && !error && artists.length === 0 && (
-                    <div className="text-center py-24 bg-white rounded-[3rem] border-2 border-dashed border-gray-100 shadow-sm">
-                        <h3 className="text-2xl font-black text-night-bordeaux mb-2">Artist list is empty</h3>
-                        <p className="text-gray-400 mb-8 max-w-sm mx-auto font-medium">Be the pioneer artist on BeautyVerse and start your journey today.</p>
-                        <button onClick={() => setShowAddForm(true)} className="text-blush-rose font-black uppercase tracking-widest text-xs hover:underline underline-offset-8">Join the Visionaries →</button>
-                    </div>
-                )}
-
-                {!loading && !error && artists.length > 0 && (
+                ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {artists.map((artist, index) => (
                             <motion.div
@@ -155,44 +128,57 @@ const Professionals = () => {
                                 className="group relative cursor-pointer"
                             >
                                 <div className="aspect-[3/4] rounded-[2.5rem] overflow-hidden relative shadow-lg group-hover:shadow-2xl group-hover:scale-[1.02] transition-all duration-500 border border-white">
+                                    {/* Artist Image */}
                                     <img
                                         src={artist.profile_picture || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400'}
                                         alt={artist.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
+                                    
                                     <div className="absolute inset-0 bg-gradient-to-t from-night-bordeaux/90 via-night-bordeaux/20 to-transparent" />
 
+                                    {/* Information Container */}
                                     <div className="absolute bottom-8 left-8 right-8">
-                                        <span className="text-[10px] font-black text-soft-apricot uppercase tracking-widest mb-1 block">
+                                        <span className="text-[10px] font-black text-soft-apricot uppercase tracking-[0.2em] mb-1 block">
                                             {artist.brand_name || 'Individual Artist'}
                                         </span>
-                                        <h3 className="text-2xl font-heading font-black text-white mb-3">{artist.name}</h3>
+                                        
+                                        {/* Artist Name */}
+                                        <h3 className="text-3xl font-heading font-black text-white mb-4">
+                                            {artist.name}
+                                        </h3>
+                                        
+                                        {/* Dynamic Service Categories */}
                                         <div className="flex gap-2 flex-wrap">
                                             {(() => {
-                                                const categories = (artist.categories && artist.categories.length > 0)
-                                                    ? artist.categories
-                                                    : (artist.specialties || []);
+                                                const serviceList = (artist.services || [])
+                                                    .map(s => typeof s === 'object' ? s.category : s)
+                                                    .filter(Boolean);
+
+                                                const displayList = serviceList.length > 0 
+                                                    ? serviceList 
+                                                    : (artist.categories || artist.specialties || []);
+
+                                                if (displayList.length > 0) {
+                                                    return displayList.slice(0, 2).map((cat, idx) => (
+                                                        <span key={idx} className="px-5 py-2 bg-white/15 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 shadow-sm">
+                                                            {typeof cat === 'object' ? cat.name : cat}
+                                                        </span>
+                                                    ));
+                                                }
 
                                                 return (
-                                                    <>
-                                                        {categories.slice(0, 3).map((category, idx) => (
-                                                            <span key={idx} className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
-                                                                {category.name || category}
-                                                            </span>
-                                                        ))}
-                                                        {categories.length === 0 && (
-                                                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-tighter rounded-lg border border-white/10">
-                                                                Artist
-                                                            </span>
-                                                        )}
-                                                    </>
+                                                    <span className="px-5 py-2 bg-white/10 backdrop-blur-md text-white/80 text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/5">
+                                                        Professional
+                                                    </span>
                                                 );
                                             })()}
                                         </div>
                                     </div>
 
-                                    <div className="absolute top-8 right-8 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
-                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    {/* Floating Arrow */}
+                                    <div className="absolute top-8 right-8 w-11 h-11 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0 border border-white/30">
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                         </svg>
                                     </div>
@@ -203,7 +189,7 @@ const Professionals = () => {
                 )}
             </div>
 
-            {/* Blurred Detail Modal */}
+            {/* Detail Modal */}
             <AnimatePresence>
                 {selectedArtistId && (
                     <ProfessionalDetailsModal
