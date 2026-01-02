@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useBooking } from '../context/BookingContext';
 import api from '../utils/api';
 
 const ProfessionalDetailsModal = ({ artistId, onClose }) => {
-    const { user: authUser } = useAuth(); 
+    const { user: authUser } = useAuth();
     const [artist, setArtist] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteError, setDeleteError] = useState('');
+    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [bookingSuccess, setBookingSuccess] = useState(false);
+    const { createBooking } = useBooking();
 
     useEffect(() => {
         const fetchArtistDetails = async () => {
@@ -44,7 +48,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
             setDeleteError('');
             await api.delete(`/artists/${artistId}/artist-details/`);
             onClose(true);
-            window.location.reload(); 
+            window.location.reload();
         } catch (err) {
             const errorMsg = err.data?.detail || err.message || 'Permission Denied';
             setDeleteError(errorMsg.toUpperCase());
@@ -62,9 +66,36 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
 
     // Matches either by numeric ID or by Username string
     const isOwner = (currentUserId && artistOwnerIdentifier && String(currentUserId) === String(artistOwnerIdentifier)) ||
-                    (currentUsername && artistOwnerIdentifier && String(currentUsername) === String(artistOwnerIdentifier));
+        (currentUsername && artistOwnerIdentifier && String(currentUsername) === String(artistOwnerIdentifier));
 
     const canDelete = isAdmin || isOwner;
+
+    const handleBooking = async () => {
+        if (!selectedSlot) return alert('Please select a time slot first');
+        if (!authUser) return alert('Please login to book an appointment');
+
+        try {
+            const bookingData = {
+                artistId: artist.id,
+                artistName: artist.name,
+                artistImage: artist.profile_picture,
+                service: (artist.services && artist.services[0]) ?
+                    (typeof artist.services[0] === 'object' ? artist.services[0].category : artist.services[0]) :
+                    'Beauty Service',
+                date: selectedSlot.date,
+                time: selectedSlot.time
+            };
+
+            await createBooking(bookingData);
+            setBookingSuccess(true);
+            setTimeout(() => {
+                setBookingSuccess(false);
+                setSelectedSlot(null);
+            }, 3000);
+        } catch (err) {
+            alert('Failed to create booking: ' + err.message);
+        }
+    };
 
     if (!artistId) return null;
 
@@ -159,18 +190,31 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                                     <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-4">Open Slots</h3>
                                     <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
                                         {artist.available_slots?.map((slot, i) => (
-                                            <div key={i} className="px-3 py-1.5 bg-soft-apricot/10 border border-soft-apricot/20 rounded-lg text-center">
-                                                <p className="text-[9px] font-black text-night-bordeaux">{slot.date}</p>
-                                                <p className="text-[8px] font-bold text-gray-400">{slot.time}</p>
-                                            </div>
+                                            <button
+                                                key={i}
+                                                onClick={() => setSelectedSlot(slot)}
+                                                className={`px-3 py-1.5 rounded-lg text-center transition-all border ${selectedSlot === slot
+                                                        ? 'bg-night-bordeaux text-white border-night-bordeaux shadow-md scale-105'
+                                                        : 'bg-soft-apricot/10 border-soft-apricot/20 hover:border-soft-apricot text-night-bordeaux'
+                                                    }`}
+                                            >
+                                                <p className="text-[9px] font-black">{slot.date}</p>
+                                                <p className={`text-[8px] font-bold ${selectedSlot === slot ? 'text-white/70' : 'text-gray-400'}`}>{slot.time}</p>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-4 pt-6 mt-10">
-                                <button className="w-full py-5 bg-night-bordeaux text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
-                                    Book me
+                                <button
+                                    onClick={handleBooking}
+                                    className={`w-full py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl transition-all ${bookingSuccess
+                                            ? 'bg-green-500 text-white'
+                                            : 'bg-night-bordeaux text-white hover:shadow-2xl hover:-translate-y-1'
+                                        }`}
+                                >
+                                    {bookingSuccess ? 'Booking confirmed!' : 'Book me'}
                                 </button>
 
                                 {canDelete && (
@@ -208,7 +252,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                             <div className="text-center">
                                 <h3 className="text-2xl font-black text-night-bordeaux mb-3">Remove Profile?</h3>
                                 <p className="text-gray-500 mb-8 font-medium">This action is permanent.</p>
-                                
+
                                 {deleteError && (
                                     <p className="mb-6 p-3 bg-berry-crush/10 text-berry-crush text-[10px] font-black uppercase tracking-widest rounded-xl border border-berry-crush/20">
                                         {deleteError}
@@ -217,8 +261,8 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
 
                                 <div className="flex gap-3">
                                     <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 bg-gray-100 rounded-xl font-black text-[10px] uppercase">Cancel</button>
-                                    <button 
-                                        onClick={handleDelete} 
+                                    <button
+                                        onClick={handleDelete}
                                         disabled={deleteLoading}
                                         className="flex-1 py-3 bg-berry-crush text-white rounded-xl font-black text-[10px] uppercase disabled:opacity-50"
                                     >

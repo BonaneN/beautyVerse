@@ -13,6 +13,16 @@ const Professionals = () => {
     const [error, setError] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
     const [selectedArtistId, setSelectedArtistId] = useState(null);
+    const [activeFilter, setActiveFilter] = useState('All');
+
+    const serviceMapping = {
+        'Makeup Artistry': ['Makeup', 'Lashes & Brows'],
+        'Nailcare': ['Nails', 'Henna'],
+        'Skin Care': ['Spa & Massage', 'Skincare'],
+        'Hair Styling': ['Hair', 'Barber']
+    };
+
+    const filterGroups = ['All', 'Makeup Artistry', 'Nailcare', 'Skin Care', 'Hair Styling'];
 
     const fetchArtists = async () => {
         try {
@@ -90,6 +100,22 @@ const Professionals = () => {
                             </Link>
                         )}
                     </div>
+
+                    {/* Filter Bar */}
+                    <div className="flex flex-wrap justify-center gap-3 mt-16 px-4">
+                        {filterGroups.map(group => (
+                            <button
+                                key={group}
+                                onClick={() => setActiveFilter(group)}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${activeFilter === group
+                                    ? 'bg-night-bordeaux text-white border-night-bordeaux shadow-lg shadow-night-bordeaux/20'
+                                    : 'bg-white text-gray-400 border-gray-100 hover:border-soft-apricot/40 hover:text-night-bordeaux'
+                                    }`}
+                            >
+                                {group}
+                            </button>
+                        ))}
+                    </div>
                 </motion.div>
             </div>
 
@@ -118,7 +144,16 @@ const Professionals = () => {
                     </div>
                 ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {artists.map((artist, index) => (
+                        {artists.filter(artist => {
+                            if (activeFilter === 'All') return true;
+                            const allowedCategories = serviceMapping[activeFilter] || [];
+                            const artistCats = (artist.services || [])
+                                .map(s => (typeof s === 'object' ? s.category : s).toLowerCase().trim());
+
+                            return allowedCategories.some(cat =>
+                                artistCats.includes(cat.toLowerCase().trim())
+                            );
+                        }).map((artist, index) => (
                             <motion.div
                                 key={artist.id}
                                 initial={{ opacity: 0, y: 30 }}
@@ -134,7 +169,7 @@ const Professionals = () => {
                                         alt={artist.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
-                                    
+
                                     <div className="absolute inset-0 bg-gradient-to-t from-night-bordeaux/90 via-night-bordeaux/20 to-transparent" />
 
                                     {/* Information Container */}
@@ -142,21 +177,21 @@ const Professionals = () => {
                                         <span className="text-[10px] font-black text-soft-apricot uppercase tracking-[0.2em] mb-1 block">
                                             {artist.brand_name || 'Individual Artist'}
                                         </span>
-                                        
+
                                         {/* Artist Name */}
                                         <h3 className="text-3xl font-heading font-black text-white mb-4">
                                             {artist.name}
                                         </h3>
-                                        
-                                        {/* Dynamic Service Categories */}
+
+                                        {/* Service Categories */}
                                         <div className="flex gap-2 flex-wrap">
                                             {(() => {
                                                 const serviceList = (artist.services || [])
                                                     .map(s => typeof s === 'object' ? s.category : s)
                                                     .filter(Boolean);
 
-                                                const displayList = serviceList.length > 0 
-                                                    ? serviceList 
+                                                const displayList = serviceList.length > 0
+                                                    ? serviceList
                                                     : (artist.categories || artist.specialties || []);
 
                                                 if (displayList.length > 0) {
@@ -174,13 +209,6 @@ const Professionals = () => {
                                                 );
                                             })()}
                                         </div>
-                                    </div>
-
-                                    {/* Floating Arrow */}
-                                    <div className="absolute top-8 right-8 w-11 h-11 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0 border border-white/30">
-                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
                                     </div>
                                 </div>
                             </motion.div>
