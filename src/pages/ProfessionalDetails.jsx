@@ -18,14 +18,14 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                 setLoading(true);
                 const data = await api.get(`/artists/${artistId}/artist-details/`);
 
-                let services = data.services || data.categories || data.specialties || [];
+                let services = data.services || [];
                 let slots = data.available_slots || [];
 
                 if (typeof services === 'string') {
-                    try { services = JSON.parse(services); } catch (e) { console.error('Failed to parse services', e); services = []; }
+                    try { services = JSON.parse(services); } catch (e) { services = []; }
                 }
                 if (typeof slots === 'string') {
-                    try { slots = JSON.parse(slots); } catch (e) { console.error('Failed to parse slots', e); slots = []; }
+                    try { slots = JSON.parse(slots); } catch (e) { slots = []; }
                 }
 
                 setArtist({ ...data, services, available_slots: slots });
@@ -94,7 +94,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                     </div>
                 ) : (
                     <>
-                        {/* Visual Identity - Clean Image */}
+                        {/* Visual Identity */}
                         <div className="w-full md:w-2/5 relative h-[300px] md:h-auto">
                             <img
                                 src={artist.profile_picture || 'https://images.unsplash.com/photo-1560169897-408472b4f260?w=800'}
@@ -107,31 +107,30 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                         {/* Details & Actions */}
                         <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto bg-white/40">
                             <div className="space-y-8">
-                                {/* Header Info: Name, Brand, Services */}
+                                {/* Header Info */}
                                 <div>
                                     <h2 className="text-4xl font-heading font-black text-night-bordeaux mb-2">{artist.name}</h2>
                                     <p className="text-lg font-medium text-gray-400 italic mb-4">{artist.brand_name || 'Individual Virtuoso'}</p>
 
-                                    {/* Services/Categories */}
+                                    {/* DYNAMIC SERVICE CATEGORY TAGS */}
                                     <div className="flex gap-2 flex-wrap mb-6">
                                         {(() => {
-                                            const categories = (artist.categories && artist.categories.length > 0)
-                                                ? artist.categories
-                                                : (artist.specialties || []);
+                                            const serviceList = (artist.services || [])
+                                                .map(s => typeof s === 'object' ? s.category : s)
+                                                .filter(Boolean);
 
-                                            return (
-                                                <>
-                                                    {categories.map((category, idx) => (
-                                                        <span key={idx} className="px-3 py-1 bg-night-bordeaux/5 text-night-bordeaux text-[9px] font-black uppercase tracking-tighter rounded-lg border border-night-bordeaux/10">
-                                                            {category.name || category}
-                                                        </span>
-                                                    ))}
-                                                    {categories.length === 0 && (
-                                                        <span className="px-3 py-1 bg-night-bordeaux/5 text-night-bordeaux text-[9px] font-black uppercase tracking-tighter rounded-lg border border-night-bordeaux/10">
-                                                            Artist
-                                                        </span>
-                                                    )}
-                                                </>
+                                            const displayTags = serviceList.length > 0 
+                                                ? serviceList 
+                                                : (artist.categories || artist.specialties || []);
+
+                                            return displayTags.length > 0 ? displayTags.map((cat, idx) => (
+                                                <span key={idx} className="px-4 py-2 bg-night-bordeaux text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm">
+                                                    {typeof cat === 'object' ? cat.name : cat}
+                                                </span>
+                                            )) : (
+                                                <span className="px-4 py-2 bg-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-xl">
+                                                    Beauty Professional
+                                                </span>
                                             );
                                         })()}
                                     </div>
@@ -142,6 +141,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                                     <div>
                                         <h3 className="text-[10px] font-black text-blush-rose uppercase tracking-[0.3em] mb-4">Reach us at</h3>
                                         <div className="flex flex-wrap gap-2">
+                                            {/* Instagram */}
                                             {artist.instagram && (
                                                 <a href={artist.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-xl shadow-md hover:scale-110 transition-all" title="Instagram">
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -149,6 +149,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                                                     </svg>
                                                 </a>
                                             )}
+                                            {/* TikTok (Restored) */}
                                             {artist.tiktok && (
                                                 <a href={artist.tiktok} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-xl shadow-md hover:scale-110 transition-all" title="TikTok">
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -156,6 +157,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                                                     </svg>
                                                 </a>
                                             )}
+                                            {/* WhatsApp */}
                                             {artist.whatsapp_contact && (
                                                 <a href={`https://wa.me/${artist.whatsapp_contact.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-[#25D366] text-white rounded-xl shadow-md hover:scale-110 transition-all" title="WhatsApp">
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -201,7 +203,8 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                                     Book me
                                 </button>
 
-                                {(user?.isAdmin || (user?.id && (user.id === artist.user || user.id === artist.user_id || user.id === artist.owner)) || (user?.username && user.username === artist.created_by)) && (
+                                {/* Admin / Owner Actions */}
+                                {(user?.isAdmin || (user?.id && (user.id === artist.user || user.id === artist.user_id || user.id === artist.owner))) && (
                                     <button
                                         onClick={() => setShowDeleteConfirm(true)}
                                         className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:text-berry-crush hover:border-berry-crush/30 transition-all bg-white shadow-sm"
@@ -218,7 +221,7 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                 )}
             </motion.div>
 
-            {/* Delete Confirmation Modal */}
+            {/* Delete Confirmation Overlay */}
             <AnimatePresence>
                 {showDeleteConfirm && (
                     <motion.div
@@ -228,7 +231,6 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                         className="absolute inset-0 z-50 flex items-center justify-center p-4"
                     >
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
-
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
@@ -236,41 +238,13 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
                             className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
                         >
                             <div className="text-center">
-                                <div className="w-16 h-16 bg-berry-crush/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <svg className="w-8 h-8 text-berry-crush" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                </div>
-
-                                <h3 className="text-2xl font-heading font-black text-night-bordeaux mb-3">Remove Professional?</h3>
-                                <p className="text-gray-500 font-medium mb-8">This action cannot be undone. The artist profile will be permanently removed from the directory.</p>
-
-                                {deleteError && (
-                                    <p className="mb-6 p-4 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-100">
-                                        {deleteError}
-                                    </p>
-                                )}
-
+                                <h3 className="text-2xl font-black text-night-bordeaux mb-3">Remove Profile?</h3>
+                                <p className="text-gray-500 mb-8 font-medium">This action is permanent.</p>
+                                {deleteError && <p className="mb-4 text-xs text-red-500 font-bold uppercase">{deleteError}</p>}
                                 <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setShowDeleteConfirm(false)}
-                                        className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleDelete}
-                                        disabled={deleteLoading}
-                                        className="flex-1 px-6 py-3 bg-berry-crush text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-berry-crush/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                    >
-                                        {deleteLoading ? (
-                                            <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                                                Removing...
-                                            </>
-                                        ) : (
-                                            'Delete'
-                                        )}
+                                    <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 bg-gray-100 rounded-xl font-black text-[10px] uppercase">Cancel</button>
+                                    <button onClick={handleDelete} className="flex-1 py-3 bg-berry-crush text-white rounded-xl font-black text-[10px] uppercase">
+                                        {deleteLoading ? 'Removing...' : 'Delete'}
                                     </button>
                                 </div>
                             </div>
