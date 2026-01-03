@@ -21,7 +21,7 @@ const Auth = ({ initialMode = 'login' }) => {
     const heroImage = "https://images.unsplash.com/photo-1540555700478-4be289fbecee?q=80&w=2070&auto=format&fit=crop";
 
     useEffect(() => {
-        if (user) navigate('/dashboard');
+        if (user) navigate('/');
     }, [user, navigate]);
 
     useEffect(() => {

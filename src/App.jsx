@@ -10,7 +10,6 @@ import Auth from './pages/Auth';
 import Products from './pages/Products';
 import Services from './pages/Services';
 import Professionals from './pages/Professionals';
-import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
@@ -51,15 +50,6 @@ function App() {
                     }
                   />
 
-                  {/* Protected Routes for registered users */}
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    }
-                  />
                   <Route
                     path="/admin"
                     element={

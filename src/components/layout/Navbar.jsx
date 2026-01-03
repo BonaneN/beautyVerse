@@ -71,7 +71,6 @@ const Navbar = () => {
                             {user.isAdmin && (
                                 <NavLink to="/admin" className="text-sm font-bold text-blush-rose hover:text-berry-crush transition-colors">Admin</NavLink>
                             )}
-                            <NavLink to="/dashboard" className="text-sm font-medium text-night-bordeaux hover:text-blush-rose transition-colors">Dashboard</NavLink>
                             <button
                                 onClick={() => logout()}
                                 className="text-sm font-medium text-berry-crush hover:text-blush-rose transition-colors"
@@ -116,7 +115,7 @@ const Navbar = () => {
                         )}
                     </Link>
 
-                    <button 
+                    <button
                         onClick={toggleMenu}
                         className="p-2 text-night-bordeaux z-[1001]"
                         aria-label="Toggle Menu"
@@ -149,7 +148,6 @@ const Navbar = () => {
                             {user.isAdmin && (
                                 <Link to="/admin" onClick={() => setIsOpen(false)} className="text-lg font-bold text-blush-rose">Admin Panel</Link>
                             )}
-                            <Link to="/dashboard" onClick={() => setIsOpen(false)} className="text-lg font-bold text-night-bordeaux">My Dashboard</Link>
                             <button
                                 onClick={() => { logout(); setIsOpen(false); }}
                                 className="w-full py-4 bg-berry-crush/10 text-berry-crush rounded-2xl font-bold uppercase tracking-widest text-xs transition-all active:scale-95"
@@ -159,16 +157,16 @@ const Navbar = () => {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-4 w-full max-w-[280px]">
-                            <Link 
-                                to="/register" 
-                                onClick={() => setIsOpen(false)} 
+                            <Link
+                                to="/register"
+                                onClick={() => setIsOpen(false)}
                                 className="w-full py-4 text-center bg-gradient-to-r from-blush-rose to-berry-crush text-white font-bold text-lg rounded-full shadow-lg transition-all active:scale-95"
                             >
                                 Join BeautyVerse
                             </Link>
-                            <Link 
-                                to="/login" 
-                                onClick={() => setIsOpen(false)} 
+                            <Link
+                                to="/login"
+                                onClick={() => setIsOpen(false)}
                                 className="w-full py-4 text-center bg-white text-night-bordeaux border-2 border-night-bordeaux/20 rounded-full font-bold text-lg shadow-sm transition-all active:scale-95"
                             >
                                 Login
