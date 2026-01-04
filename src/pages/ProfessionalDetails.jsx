@@ -87,7 +87,14 @@ const ProfessionalDetailsModal = ({ artistId, onClose }) => {
             const bookingData = {
                 artistId: artist.id,
                 artistName: artist.name,
+                artistBrand: artist.brand_name || 'Individual Specialist',
                 artistImage: artist.profile_picture,
+                artistLocation: artist.location || artist.shop_location || 'Kigali, Rwanda',
+                artistContact: {
+                    instagram: artist.instagram,
+                    tiktok: artist.tiktok,
+                    whatsapp: artist.whatsapp_contact
+                },
                 service: (artist.services && artist.services[0]) ?
                     (typeof artist.services[0] === 'object' ? artist.services[0].category : artist.services[0]) :
                     'Beauty Service',
