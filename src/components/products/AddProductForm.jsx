@@ -28,7 +28,6 @@ const AddProductForm = ({ onProductAdded }) => {
         const fetchCategories = async () => {
             try {
                 console.log('Fetching categories from API...');
-                // Verified endpoint: /products/list-categories/
                 const data = await api.get('/products/list-categories/');
                 console.log('Categories API response:', data);
 
@@ -36,7 +35,6 @@ const AddProductForm = ({ onProductAdded }) => {
                     setCategories(data);
                 } else {
                     console.error('API response is not an array:', data);
-                    // If the endpoint doesn't exist yet, we'll keep categories empty or use a placeholder
                 }
             } catch (err) {
                 console.error('Failed to fetch categories:', err);
@@ -82,13 +80,16 @@ const AddProductForm = ({ onProductAdded }) => {
                 const formDataToSend = new FormData();
                 formDataToSend.append('name', formData.name);
                 formDataToSend.append('description', formData.description);
+                formDataToSend.append('short_description', formData.description); 
                 formDataToSend.append('price', formData.price);
-                formDataToSend.append('category', formData.category); // Sending Name (e.g., "Makeup")
+                formDataToSend.append('category', formData.category);
                 formDataToSend.append('delivery_option', formData.delivery_option);
                 formDataToSend.append('shop_location', formData.shop_location);
 
                 if (formData.discount_percentage) {
                     formDataToSend.append('discount_percentage', formData.discount_percentage);
+                } else {
+                    formDataToSend.append('discount_percentage', '0');
                 }
 
                 formDataToSend.append('product_image', imageFile);
@@ -129,10 +130,11 @@ const AddProductForm = ({ onProductAdded }) => {
                 const productData = {
                     name: formData.name,
                     description: formData.description,
+                    short_description: formData.description,
                     price: parseFloat(formData.price),
                     discount_percentage: formData.discount_percentage ? parseFloat(formData.discount_percentage) : 0,
-                    category: formData.category, // Sending Name
-                    product_image: formData.product_image, // image URL
+                    category: formData.category,
+                    product_image: formData.product_image,
                     delivery_option: formData.delivery_option,
                     shop_location: formData.shop_location
                 };
@@ -163,7 +165,6 @@ const AddProductForm = ({ onProductAdded }) => {
         } catch (err) {
             console.error('Error adding product:', err);
 
-            // Prioritize structured data from API response
             const fieldErrors = err.data;
             if (fieldErrors && typeof fieldErrors === 'object' && !Array.isArray(fieldErrors)) {
                 const errorMsg = Object.entries(fieldErrors)
@@ -220,7 +221,7 @@ const AddProductForm = ({ onProductAdded }) => {
                             <label className="block text-sm font-semibold text-night-bordeaux">
                                 Category *
                             </label>
-                            {user && user.isAdmin && (
+                            {user && (
                                 <Link to="/admin" className="text-xs font-bold text-blush-rose hover:underline">
                                     + Add New
                                 </Link>
