@@ -3,13 +3,6 @@
 **BeautyVerse** is a premium, high-end digital marketplace designed to bridge the gap between luxury beauty products and professional expertise. Built with a focus on **visual excellence** and **seamless user experience**, it provides a curated journey for anyone looking to elevate their beauty routine.
 
 
-## Experience the Magic
-
-- 📺 **Video Demo**: [Demo Video](https://example.com/demo-video)
-- 🌐 **Live Deployment**: [Visit BeautyVerse](https://beauty-verse-live.vercel.app)
-- 🛠 **Backend Repository**: [View API Documentation](https://github.com/example/beautyverse-backend)
-
-
 ## Implemented Features
 
 ### 1. **Core navigation**
